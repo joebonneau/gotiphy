@@ -58,6 +58,36 @@ func main() {
 					return nil
 				},
 			},
+			{
+				Name:  "play",
+				Usage: "Play a specific item or resume current playback",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "uri",
+						Aliases: []string{"u"},
+						Usage:   "Play a specific Spotify URI",
+					},
+				},
+				Action: func(cCtx *cli.Context) error {
+					uri := cCtx.String("uri")
+					err := commands.StartPlayback(uri)
+					if err != nil {
+						log.Fatal(err)
+					}
+					return nil
+				},
+			},
+			{
+				Name:  "pause",
+				Usage: "Pauses current playback",
+				Action: func(cCtx *cli.Context) error {
+					err := commands.PausePlayback()
+					if err != nil {
+						log.Fatal(err)
+					}
+					return nil
+				},
+			},
 		},
 	}
 
