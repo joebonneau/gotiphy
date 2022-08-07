@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/joebonneau/gotiphy/gotiphy/lib"
 )
@@ -20,12 +19,10 @@ func NextTrack() error {
 		return err
 	}
 
-	nowPlaying, err := client.PlayerCurrentlyPlaying(ctx)
+	err = lib.GetAndDisplayCurrentPlayback(ctx, *client)
 	if err != nil {
 		return err
 	}
-	item := nowPlaying.Item
-	artistsString := lib.GetArtistsString(item.Artists)
-	fmt.Printf("Now playing: %s by %s from the album %s (%v)", item.Name, artistsString, item.Album.Name, item.Album.ReleaseDateTime().Year())
+
 	return nil
 }
