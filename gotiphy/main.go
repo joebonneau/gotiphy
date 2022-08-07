@@ -5,8 +5,23 @@ import (
 	"os"
 
 	"github.com/joebonneau/gotiphy/gotiphy/commands"
+	rdmcommands "github.com/joebonneau/gotiphy/gotiphy/commands/random"
 	"github.com/urfave/cli/v2"
 )
+
+var rdmFlags []cli.Flag = []cli.Flag{
+	&cli.BoolFlag{
+		Name:        "play",
+		Aliases:     []string{"p"},
+		Usage:       "Play the randomly selected item",
+		DefaultText: "play",
+	},
+	&cli.BoolFlag{
+		Name:    "queue",
+		Aliases: []string{"q"},
+		Usage:   "Queue the randomly selected item",
+	},
+}
 
 func main() {
 	app := &cli.App{
@@ -86,6 +101,53 @@ func main() {
 						log.Fatal(err)
 					}
 					return nil
+				},
+			},
+			{
+				Name:    "random",
+				Aliases: []string{"rdm"},
+				Usage:   "Options for playing or queueing random media",
+				Subcommands: []*cli.Command{
+					{
+						Name:    "album",
+						Aliases: []string{"a"},
+						Usage:   "Selects an album at random from user library",
+						Flags:   rdmFlags,
+						Action: func(cCtx *cli.Context) error {
+							if cCtx.NArg() > 1 {
+								log.Fatal("too many flags were specified")
+							}
+							action := "play"
+							if cCtx.Bool("queue") {
+								action = "queue"
+							}
+							err := rdmcommands.RandomUserAlbum(action)
+							if err != nil {
+								log.Fatal(err)
+							}
+							return nil
+						},
+					},
+					{
+						Name:    "playlist",
+						Aliases: []string{"p", "pl"},
+						Usage:   "Selects a playlist at random from user library",
+						Flags:   rdmFlags,
+						Action: func(cCtx *cli.Context) error {
+							if cCtx.NArg() > 1 {
+								log.Fatal("too many flags were specified")
+							}
+							action := "play"
+							if cCtx.Bool("queue") {
+								action = "queue"
+							}
+							err := rdmcommands.RandomUserPlaylist(action)
+							if err != nil {
+								log.Fatal(err)
+							}
+							return nil
+						},
+					},
 				},
 			},
 		},
