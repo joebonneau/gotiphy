@@ -11,10 +11,10 @@ import (
 
 var rdmFlags []cli.Flag = []cli.Flag{
 	&cli.BoolFlag{
-		Name:        "play",
-		Aliases:     []string{"p"},
-		Usage:       "Play the randomly selected item",
-		DefaultText: "play",
+		Name:    "play",
+		Aliases: []string{"p"},
+		Usage:   "Play the randomly selected item",
+		Value:   true,
 	},
 	&cli.BoolFlag{
 		Name:    "queue",
