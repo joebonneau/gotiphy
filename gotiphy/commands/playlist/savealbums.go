@@ -15,11 +15,11 @@ const (
 )
 
 type UsefulAlbum struct {
-	Album           spotify.SimpleAlbum
+	Album           *spotify.SimpleAlbum
 	ActualAlbumType string
 }
 
-func SavePlaylistAlbums(playlistID string, all bool) error {
+func SavePlaylistAlbums(playlistID string, mode string) error {
 	ctx := context.Background()
 	client, err := lib.GetClient()
 	if err != nil {
@@ -43,11 +43,11 @@ func SavePlaylistAlbums(playlistID string, all bool) error {
 			}
 			if !albumInLibrary[0] {
 				viableOptions = append(
-					viableOptions, 
+					viableOptions,
 					UsefulAlbum{
-						Album: playlistItemAlbum, 
+						Album:           &playlistItemAlbum,
 						ActualAlbumType: LP,
-					}
+					},
 				)
 			}
 		case "single":
@@ -57,11 +57,11 @@ func SavePlaylistAlbums(playlistID string, all bool) error {
 			}
 			if trackInfo.Total > 1 {
 				viableOptions = append(
-					viableOptions, 
+					viableOptions,
 					UsefulAlbum{
-						Album: playlistItemAlbum, 
+						Album:           &playlistItemAlbum,
 						ActualAlbumType: EP,
-					}
+					},
 				)
 			}
 		default:
@@ -69,7 +69,7 @@ func SavePlaylistAlbums(playlistID string, all bool) error {
 		}
 	}
 
-	if all {
+	if mode == "all" {
 		var albumIDs []spotify.ID
 		for _, album := range viableOptions {
 			albumIDs = append(albumIDs, album.Album.ID)
@@ -84,9 +84,15 @@ func SavePlaylistAlbums(playlistID string, all bool) error {
 	// If the user doesn't want to auto-add every viable option, create a table to display the options
 	tab := table.NewWriter()
 	tab.SetOutputMirror(os.Stdout)
-	tab.AppendHeader(table.Row{"#", "Artist(s)", "Album Name", "Album Type", "Release Date"})
+	tab.AppendHeader(table.Row{"#", "Album Name", "Artist(s)", "Album Type", "Release Date"})
 	for i, album := range viableOptions {
-		tab.AppendRow(table.Row{i, lib.GetArtistsString(album.Album.Artists), album.ActualAlbumType, album.Album.ReleaseDate})
+		tab.AppendRow(table.Row{
+			i,
+			album.Album.Name,
+			lib.Truncate(lib.GetArtistsString(album.Album.Artists), 40),
+			album.ActualAlbumType,
+			album.Album.ReleaseDate,
+		})
 	}
 	tab.Render()
 	return nil

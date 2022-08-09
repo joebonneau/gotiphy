@@ -13,3 +13,10 @@ func GetArtistsString(artists []spotify.SimpleArtist) string {
 	}
 	return strings.Join(result, ", ")
 }
+
+func Truncate(str string, numChars int) string {
+	if numChars != 0 && len(str) > numChars {
+		return str[:numChars] + "..."
+	}
+	return str
+}

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/joebonneau/gotiphy/gotiphy/commands"
+	playlistcmds "github.com/joebonneau/gotiphy/gotiphy/commands/playlist"
 	rdmcommands "github.com/joebonneau/gotiphy/gotiphy/commands/random"
 	"github.com/urfave/cli/v2"
 )
@@ -114,8 +115,8 @@ func main() {
 						Usage:   "Selects an album at random from user library",
 						Flags:   rdmFlags,
 						Action: func(cCtx *cli.Context) error {
-							if cCtx.NArg() > 1 {
-								log.Fatal("too many flags were specified")
+							if cCtx.NumFlags() > 1 {
+								log.Fatal("only one flag may be specified at a time")
 							}
 							action := "play"
 							if cCtx.Bool("queue") {
@@ -134,8 +135,8 @@ func main() {
 						Usage:   "Selects a playlist at random from user library",
 						Flags:   rdmFlags,
 						Action: func(cCtx *cli.Context) error {
-							if cCtx.NArg() > 1 {
-								log.Fatal("too many flags were specified")
+							if cCtx.NumFlags() > 1 {
+								log.Fatal("only one flag may be specified at a time")
 							}
 							action := "play"
 							if cCtx.Bool("queue") {
@@ -148,6 +149,47 @@ func main() {
 							return nil
 						},
 					},
+				},
+			},
+			{
+				Name:    "playlist",
+				Aliases: []string{"pl"},
+				Usage:   "Adds albums associated with the tracks in a playlist to library",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "all",
+						Aliases: []string{"a"},
+						Usage:   "Adds all albums from playlist to library",
+						Value:   true,
+					},
+					&cli.BoolFlag{
+						Name:    "interactive",
+						Aliases: []string{"i", "it"},
+						Usage:   "Display albums to be added and prompts user",
+						Value:   false,
+					},
+				},
+				Action: func(cCtx *cli.Context) error {
+					if cCtx.IsSet("all") && cCtx.IsSet("interactive") {
+						log.Fatal("only one flag may be specified at a time")
+					}
+					switch cCtx.NArg() {
+					case 0:
+						log.Fatal("the playlist ID was not specified")
+					case 1:
+						mode := "all"
+						if cCtx.Bool("interactive") {
+							mode = "interactive"
+						}
+						err := playlistcmds.SavePlaylistAlbums(cCtx.Args().First(), mode)
+						if err != nil {
+							log.Fatal(err)
+						}
+						return nil
+					default:
+						log.Fatal("too many arguments were provided")
+					}
+					return nil
 				},
 			},
 		},
